@@ -29,62 +29,77 @@ export default function SignupForm() {
     setSubmitted(true);
   };
 
-  return (
-    <div className="w-full max-w-sm bg-zinc-900 text-white p-6 rounded-xl shadow-lg">
-      <h2 className="text-2xl font-semibold text-center mb-6">Sign Up</h2>
+ return (
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-6">
+      <div className="w-full max-w-sm bg-zinc-900 text-white p-6 rounded-xl shadow-lg">
+        <h2 className="text-2xl font-semibold text-center mb-6">Sign Up</h2>
 
-      {submitted ? (
-        <p className="text-green-400 text-center">
-          ✅ Thanks for signing up, {form.name}!
-        </p>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+        {submitted ? (
+          <>
+            <p className="text-green-400 text-center">
+              ✅ Thanks for signing up, {form.name}!
+            </p>
 
-          <div>
-            <label className="block text-sm mb-2">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              className="w-full p-3 rounded-md bg-zinc-800 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
+            <a href="/login">
+              <button
+                type="submit"
+                className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-md font-medium transition"
+              >
+                Sign in
+              </button>
+            </a>
 
-          <div>
-            <label className="block text-sm mb-2">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              className="w-full p-3 rounded-md bg-zinc-800 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
+          </>
 
-          <div>
-            <label className="block text-sm mb-2">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              className="w-full p-3 rounded-md bg-zinc-800 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && <p className="text-red-400 text-sm">{error}</p>}
 
-          <button
-            type="submit"
-            className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-md font-medium transition"
-          >
-            Sign Up
-          </button>
-        </form>
-      )}
-    </div>
+            <div>
+              <label className="block text-sm mb-2">Name</label>
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+                className="w-full p-3 rounded-md bg-zinc-800 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm mb-2">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                required
+                className="w-full p-3 rounded-md bg-zinc-800 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm mb-2">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                required
+                className="w-full p-3 rounded-md bg-zinc-800 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-md font-medium transition"
+            >
+              Sign Up
+            </button>
+          </form>
+        )}
+      </div>
+    </main>
   );
 }

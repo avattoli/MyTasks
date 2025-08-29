@@ -9,14 +9,9 @@ exports.signup = async (req, res, next) => {
       return res.status(400).json({ error: "username, email, password required" });
 
     const existingEmail = await User.findOne({ email }); // or username
-    const existingUser = await User.findOne({username});
 
     if (existingEmail) {
       res.status(409).json({ error: "Email already registered" }); // 409 = Conflict
-    }
-
-    if (existingUser) {
-      res.status(409).json({ error: "Username already taken" }); // 409 = Conflict
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -39,20 +34,30 @@ function signToken(user) {
 
 exports.login = async (req, res, next ) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username || !password)
-      return res.status(400).json({ error: "username and password required" });
+    if (!email || !password)
+      return res.status(400).json({ error: "email and password required" });
 
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
-    console.log("JWT_SECRET:", process.env.JWT_SECRET);
     const token = signToken(user);
-    return res.json({ token });
+    
+    res.cookie("refreshToken", token, {
+      httpOnly: true,     
+      secure: true,        
+      sameSite: "lax",     
+      maxAge: 24 * 60 * 60 * 1000 // 7 days in ms
+    });
+    
+    return res.status(200).json({
+      message: "Logged in",
+      user: { id: user._id, username: user.username, email: user.email },
+    });
   } catch (err) {
     next(err);
   }
