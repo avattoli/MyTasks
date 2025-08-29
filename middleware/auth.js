@@ -1,29 +1,22 @@
 
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-function auth(req, res, next) {
-    // 1. Read Authorization header
-    const header = req.headers.authorization || "";
-  
-    // 2. Extract token ("Bearer <token>")
-    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
-    if (!token) return res.status(401).json({ error: "Missing token" });
+  exports.requireSession = (req, res, next) => {
+    const token = req.cookies.refreshToken; // or your cookie name
+    if (!token) return res.status(401).json({ error: "Not logged in" });
   
     try {
-      // 3. Verify token
       const payload = jwt.verify(token, process.env.JWT_SECRET);
-  
-      // 4. Attach payload data to request
-      req.user = { id: payload.userId, role: payload.role };
-  
-      // 5. Continue
-      next();
-    } catch (err) {
-      if (err.name === "TokenExpiredError") {
-        return res.status(401).json({ error: "Token expired" });
-      }
-      return res.status(401).json({ error: "Invalid token" });
+      req.userId = payload.userId;             // set for later handlers
+      return next();
+    } catch {
+      return res.status(401).json({ error: "Invalid/expired session" });
     }
   }
   
-  module.exports = auth;
+
+exports.me = async (req, res) => {
+    const user = await User.findById(req.userId).select("_id username email");
+    res.json({ user });
+  }

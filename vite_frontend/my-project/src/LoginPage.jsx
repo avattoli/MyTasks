@@ -1,10 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: "", password: "" }); 
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // Check session once on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("http://localhost:3000/auth/me", {
+          credentials: "include",       
+        });
+        if (!res.ok) {
+          setUser(null);
+          return;
+        }
+        const data = await res.json();
+        setUser(data.user);
+      } catch {
+        setUser(null);
+      }
+    })();
+  }, []); 
+
+  // If already logged in, redirect home
+  useEffect(() => {
+    if (user) navigate("/");
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,20 +48,19 @@ export default function LoginPage() {
       const res = await fetch("http://localhost:3000/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // include if server sets a cookie on login
         body: JSON.stringify({ email: form.email, password: form.password }),
       });
 
-      const payload = await res.json();
+      let payload = null;
+      try { payload = await res.json(); } catch {}
+
       if (!res.ok) {
-        const msg = payload || "Unexpected error";
-        setError(msg);
+        setError(payload?.error || `Request failed (${res.status})`);
         return;
       }
-      
-      console.log(payload.message);
-      // success: you can store a token, redirect, etc.
-      // Example: localStorage.setItem('token', payload.token)
-      window.location.href = "/"; // simple redirect to home
+
+      navigate("/"); 
     } catch (err) {
       setError(err.message || "Network error");
     } finally {
@@ -45,6 +72,7 @@ export default function LoginPage() {
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-6">
       <div className="w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-lg">
         <h1 className="mb-6 text-center text-2xl font-semibold">Log in</h1>
+
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
             <div className="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
