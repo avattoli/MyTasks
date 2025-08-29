@@ -7,6 +7,7 @@ import SignupForm from './SignupForm'
 import { createBrowserRouter, RouterProvider} from 'react-router-dom'
 import HomePage from './HomePage'
 import LoginPage from './LoginPage'
+import Dashboard from './Dashboard'
 
 const router = createBrowserRouter([{
   path: '/',
@@ -19,6 +20,10 @@ const router = createBrowserRouter([{
 {
   path: '/login',
   element: <LoginPage />
+},
+{
+  path: '/dashboard',
+  element: <Dashboard />
 }])
 export default function App() {
   return (

@@ -1,0 +1,93 @@
+const crypto = require("crypto");
+const slugify = require("slugify");
+const Team = require("../models/Team"); // <- single source of truth
+
+function makeJoinCode(len = 6) {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // avoid O/0, I/1
+  const bytes = crypto.randomBytes(len);
+  let out = "";
+  for (let i = 0; i < len; i++) out += alphabet[bytes[i] % alphabet.length];
+  return out;
+}
+
+async function makeUniqueSlug(baseName) {
+  const base = slugify(baseName || "team", { lower: true, strict: true }) || "team";
+  let slug = base;
+  let n = 2;
+  // Defensive loop, DB unique index still required
+  // eslint-disable-next-line no-await-in-loop
+  while (await Team.exists({ slug })) {
+    slug = `${base}-${n++}`;
+  }
+  return slug;
+}
+
+
+async function makeUniqueSlug(baseName) {
+  const base = slugify(baseName, { lower: true, strict: true }) || "team";
+  let slug = base;
+  let n = 2;
+  while (await Team.exists({ slug })) {
+    slug = `${base}-${n++}`;
+  }
+  return slug;
+}
+
+function makeJoinCode(len = 6) {
+    // returns e.g. 'A9F3KQ'
+    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // avoid O/0, I/1
+    const bytes = crypto.randomBytes(len);
+    let out = "";
+    for (let i = 0; i < len; i++) out += alphabet[bytes[i] % alphabet.length];
+    return out;
+  }
+  
+
+  exports.create = async (req, res) => {
+    try {
+
+      const userId = req.user?._id || req.userId;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  
+      const { teamName } = req.body || {};
+      if (!teamName || !teamName.trim()) {
+        return res.status(400).json({ error: "teamName is required" });
+      }
+  
+      const slug = await makeUniqueSlug(teamName.trim());
+  
+      // generate joinCode and retry a couple times if collision (rare)
+      let joinCode;
+      for (let i = 0; i < 3; i++) {
+        joinCode = makeJoinCode(6);
+        const clash = await Team.exists({ joinCode });
+        if (!clash) break;
+        if (i === 2) joinCode = makeJoinCode(8);
+      }
+  
+      const team = await Team.create({
+        name: teamName.trim(),
+        slug,
+        joinCode,
+        leaderId: userId,
+        // optionally auto-add leader as a member:
+        // members: [{ userId, role: "ADMIN", status: "ACTIVE" }]
+      });
+  
+      return res.status(201).json({
+        _id: team._id,
+        name: team.name,
+        slug: team.slug,
+        joinCode: team.joinCode,
+        leaderId: team.leaderId,
+        createdAt: team.createdAt,
+      });
+    } catch (err) {
+      // handle unique index collisions gracefully
+      if (err.code === 11000) {
+        return res.status(409).json({ error: "Slug or join code already exists, try again." });
+      }
+      console.error(err);
+      return res.status(500).json({ error: "Server error" });
+    }
+  };

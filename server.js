@@ -5,6 +5,7 @@ const cors = require("cors");
 const userRoutes = require("./routes/users");
 const taskRoutes = require("./routes/tasks");
 const authRoutes = require("./routes/auth");
+const teamRoutes = require("./routes/teams");
 const cookieParser = require("cookie-parser");
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(cookieParser());
 app.use("/users", userRoutes);
 app.use("/tasks", taskRoutes);
 app.use("/auth", authRoutes);
+app.use("/teams", teamRoutes);
 
 const PORT = process.env.PORT || 3000;
 connectDB(process.env.MONGODB_URI)

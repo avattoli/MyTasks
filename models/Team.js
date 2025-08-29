@@ -1,0 +1,56 @@
+const mongoose = require("mongoose");
+
+const { Schema } = mongoose;
+
+const TeamSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true },
+
+    // keep simple here; rely on indexes below for uniqueness
+    slug: { type: String},                 // e.g., "acme"
+    joinCode: { type: String, sparse: true, index: true }, // e.g., "XJ93KD"
+
+    leaderId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+
+    members: {
+      type: [
+        new Schema(
+          {
+            userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+            role:   { type: String, enum: ["ADMIN", "MEMBER"], default: "MEMBER" },
+            status: { type: String, enum: ["ACTIVE", "INVITED"], default: "ACTIVE" },
+            joinedAt: { type: Date, default: Date.now }
+          },
+          { _id: false }
+        )
+      ],
+      default: []
+    },
+
+    isDeleted: { type: Boolean, default: false }
+  },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
+);
+
+// Ensure a user appears at most once in a team (enforces uniqueness within the doc)
+TeamSchema.index(
+  { _id: 1, "members.userId": 1 },
+  { unique: true, partialFilterExpression: { "members.userId": { $exists: true } } }
+);
+
+// Unique slugs and join codes (database-enforced)
+TeamSchema.index({ slug: 1 }, { unique: true });
+
+// Virtual to populate leader via leaderId
+TeamSchema.virtual("leader", {
+  ref: "User",
+  localField: "leaderId",
+  foreignField: "_id",
+  justOne: true
+});
+
+module.exports = mongoose.model("Team", TeamSchema);
