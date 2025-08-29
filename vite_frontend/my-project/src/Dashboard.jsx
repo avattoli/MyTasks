@@ -25,36 +25,91 @@ export default function Dashboard({ user, onCreateTeam, onJoinTeam, onRefresh, o
   const [teams, setTeams] =  useState([]);
 
   
-    const handleOnCreate = async (e) => {
-    e.preventDefault()
-    const teamName = createName.trim();
-    if (!teamName) {
-        console.log("Entered empty team name");
-        return;
-    }
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await fetch("http://localhost:3000/teams/getTeams", {
+                  method: "GET", // should be GET if your route is read-only
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include" // if you’re using cookies for auth
+                });
+        
+                if (!res.ok) {
+                  throw new Error("Failed to fetch teams");
+                }
+        
+                const data = await res.json(); // parse JSON from backend
+                setTeams(data.teams || []);
+                console.log(teams);   
+              } catch (err) {
+                console.error("Error fetching teams:", err);
+              }
+              
+        })();
+    }, []);
 
-    try {
-        const res = await fetch("http://localhost:3000/teams/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", // important if you’re using cookies for auth
-          body: JSON.stringify({ teamName })
-        });
-    
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || "Failed to create team");
+    const handleJoinTeam = async (e) => {
+        e.preventDefault()
+        const code = joinCode.trim();
+        if (!code) {
+            console.log("Entered empty join code");
+            return;
         }
-    
-        const newTeam = await res.json();
-        console.log("Created team:", newTeam);
-    
-        // TODO: update your local state so the new team shows in the dashboard
-        setTeams((prev) => [newTeam, ...prev]);
-      } catch (err) {
-        console.error(err);
-        alert(err.message); // or set an error state instead of alert
-      }
+
+        try {
+            const res = await fetch("http://localhost:3000/teams/join", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include", // important if you’re using cookies for auth
+            body: JSON.stringify({joinCode: code })
+            });
+            
+            if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || "Failed to join team");
+            }
+                   
+            const newTeam = await res.json();
+            console.log("Joined team:", newTeam);
+
+            setTeams((prev) => [newTeam, ...prev]);
+        } catch (err) {
+            console.error(err);
+            alert(err.message); 
+        }
+        window.location.reload();
+
+    }
+    const handleOnCreate = async (e) => {
+        e.preventDefault()
+        const teamName = createName.trim();
+        if (!teamName) {
+            console.log("Entered empty team name");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:3000/teams/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include", // important if you’re using cookies for auth
+            body: JSON.stringify({ teamName })
+            });
+        
+            if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || "Failed to create team");
+            }
+        
+            const newTeam = await res.json();
+            console.log("Created team:", newTeam);
+        
+            // TODO: update your local state so the new team shows in the dashboard
+            setTeams((prev) => [newTeam, ...prev]);
+        } catch (err) {
+            console.error(err);
+            alert(err.message); // or set an error state instead of alert
+        }
 
   }
   return (
@@ -113,7 +168,7 @@ export default function Dashboard({ user, onCreateTeam, onJoinTeam, onRefresh, o
       {/* Join Modal */}
       {joinOpen && (
         <Modal title="Join a team" onClose={() => setJoinOpen(false)}>
-          <form onSubmit={(e)=>{e.preventDefault(); onJoinTeam?.(joinCode.trim()); setJoinCode(""); setJoinOpen(false);}} className="space-y-4">
+          <form onSubmit={handleJoinTeam} className="space-y-4">
             <div>
               <label className="block text-sm mb-1">Join code</label>
               <input value={joinCode} onChange={(e) => setJoinCode(e.target.value)} className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20" placeholder="ABC123" />

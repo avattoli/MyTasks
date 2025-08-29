@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   // If already logged in, redirect home
   useEffect(() => {
-    if (user) navigate("/");
+    if (user) navigate("/dashboard");
   }, [user, navigate]);
 
   const handleChange = (e) => {

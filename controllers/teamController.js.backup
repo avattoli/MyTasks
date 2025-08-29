@@ -46,7 +46,7 @@ function makeJoinCode(len = 6) {
   exports.create = async (req, res) => {
     try {
 
-      const userId = req.userId;
+      const userId = req.user?._id || req.userId;
       if (!userId) return res.status(401).json({ error: "Unauthorized" });
   
       const { teamName } = req.body || {};
@@ -64,16 +64,7 @@ function makeJoinCode(len = 6) {
         if (!clash) break;
         if (i === 2) joinCode = makeJoinCode(8);
       }
-      
-      const sameNameTeam = await Team.findOne({
-        leaderId: userId,
-        name: teamName.trim()
-      }).collation({ locale: "en", strength: 2 }); 
-
-      if (sameNameTeam) {
-        return res.status(400).json({error: "You already lead a team with this name."});
-      }
-      
+  
       const team = await Team.create({
         name: teamName.trim(),
         slug,
@@ -102,42 +93,8 @@ function makeJoinCode(len = 6) {
   };
 
   exports.join = async (req, res) => {
-    try {
-      const userId = req.userId;
-      if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-      const joinCode = String(req.body?.joinCode || "").trim().toUpperCase();
-      if (!joinCode) return res.status(400).json({ error: "joinCode is required" });
-  
-      const team = await Team.findOne({ joinCode });
-      if (!team) return res.status(400).json({ error: "Invalid join code" });
-  
-      if (String(team.leaderId) === String(userId)) {
-        return res.status(409).json({ error: "You are already the leader of this team" });
-      }
-  
-      // Atomic add: only push if user not already a member
-      const updated = await Team.findOneAndUpdate(
-        { _id: team._id, "members.userId": { $ne: userId } },
-        { $push: { members: { userId, role: "MEMBER", status: "ACTIVE" } } },
-        { new: true, runValidators: true }
-      ).lean();
-  
-      if (!updated) {
-        // Either team vanished or user was already a member (race or duplicate)
-        const alreadyIn = await Team.exists({ _id: team._id, "members.userId": userId });
-        return res.status(alreadyIn ? 409 : 404).json({
-          error: alreadyIn ? "Already a member" : "Team not found"
-        });
-      } 
-
-      return res.status(200).json({ team: updated });
-    } catch (err) {
-      console.error("join error:", err);
-      return res.status(500).json({ error: "Server error" });
-    }
   };
-  
 
   exports.getTeams = async (req, res) => {
     try {
