@@ -11,7 +11,7 @@ exports.signup = async (req, res, next) => {
     const existingEmail = await User.findOne({ email }); // or username
 
     if (existingEmail) {
-      res.status(409).json({ error: "Email already registered" }); // 409 = Conflict
+      return res.status(409).json({ error: "Email already registered" }); // 409 = Conflict
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -48,10 +48,10 @@ exports.login = async (req, res, next ) => {
     const token = signToken(user);
     
     res.cookie("refreshToken", token, {
-      httpOnly: true,     
-      secure: true,        
-      sameSite: "lax",     
-      maxAge: 24 * 60 * 60 * 1000 // 7 days in ms
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // allow http in dev
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
     
     return res.status(200).json({
@@ -62,4 +62,3 @@ exports.login = async (req, res, next ) => {
     next(err);
   }
 };
-

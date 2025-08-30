@@ -69,7 +69,8 @@ export default function Dashboard({ user, onCreateTeam, onJoinTeam, onRefresh, o
             throw new Error(err.error || "Failed to join team");
             }
                    
-            const newTeam = await res.json();
+            const body = await res.json();
+            const newTeam = body.team || body; // handle both {team} and raw team
             console.log("Joined team:", newTeam);
 
             setTeams((prev) => [newTeam, ...prev]);
@@ -101,7 +102,8 @@ export default function Dashboard({ user, onCreateTeam, onJoinTeam, onRefresh, o
             throw new Error(err.error || "Failed to create team");
             }
         
-            const newTeam = await res.json();
+            const body = await res.json();
+            const newTeam = body.team || body; // handle both {team} and raw team
             console.log("Created team:", newTeam);
         
             // TODO: update your local state so the new team shows in the dashboard

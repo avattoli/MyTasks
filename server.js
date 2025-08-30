@@ -3,7 +3,6 @@ const express = require("express");
 const { connectDB } = require("./db");
 const cors = require("cors");
 const userRoutes = require("./routes/users");
-const taskRoutes = require("./routes/tasks");
 const authRoutes = require("./routes/auth");
 const teamRoutes = require("./routes/teams");
 const cookieParser = require("cookie-parser");
@@ -20,7 +19,6 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 // mount routes
 app.use("/users", userRoutes);
-app.use("/tasks", taskRoutes);
 app.use("/auth", authRoutes);
 app.use("/teams", teamRoutes);
 

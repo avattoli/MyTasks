@@ -1,7 +1,9 @@
 const crypto = require("crypto");
 const slugify = require("slugify");
 const Team = require("../models/Team"); // <- single source of truth
+const KanbanBoard = require("../models/KanbanBoard");
 
+// Helpers (deduplicated)
 function makeJoinCode(len = 6) {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // avoid O/0, I/1
   const bytes = crypto.randomBytes(len);
@@ -14,33 +16,12 @@ async function makeUniqueSlug(baseName) {
   const base = slugify(baseName || "team", { lower: true, strict: true }) || "team";
   let slug = base;
   let n = 2;
-  // Defensive loop, DB unique index still required
   // eslint-disable-next-line no-await-in-loop
   while (await Team.exists({ slug })) {
     slug = `${base}-${n++}`;
   }
   return slug;
 }
-
-
-async function makeUniqueSlug(baseName) {
-  const base = slugify(baseName, { lower: true, strict: true }) || "team";
-  let slug = base;
-  let n = 2;
-  while (await Team.exists({ slug })) {
-    slug = `${base}-${n++}`;
-  }
-  return slug;
-}
-
-function makeJoinCode(len = 6) {
-    // returns e.g. 'A9F3KQ'
-    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // avoid O/0, I/1
-    const bytes = crypto.randomBytes(len);
-    let out = "";
-    for (let i = 0; i < len; i++) out += alphabet[bytes[i] % alphabet.length];
-    return out;
-  }
   
 
   exports.create = async (req, res) => {
@@ -79,9 +60,13 @@ function makeJoinCode(len = 6) {
         slug,
         joinCode,
         leaderId: userId,
-        // optionally auto-add leader as a member:
-        // members: [{ userId, role: "ADMIN", status: "ACTIVE" }]
       });
+      // Auto-create a Kanban board; ignore duplicate errors
+      try {
+        await KanbanBoard.create({ teamId: team._id });
+      } catch (e) {
+        if (e?.code !== 11000) console.warn("Kanban auto-create failed:", e.message || e);
+      }
   
       return res.status(201).json({
         _id: team._id,
@@ -167,6 +152,54 @@ function makeJoinCode(len = 6) {
     } catch (err) {
       console.error("Error fetching teams:", err);
       return res.status(500).json({ error: "Internal server error" });
+    }
+  };
+  
+  // Get team members by slug with basic user info
+  exports.members = async (req, res) => {
+    try {
+      const userId = req.userId;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+      const { slug } = req.params;
+      if (!slug) return res.status(400).json({ error: "slug is required" });
+
+      const team = await Team
+        .findOne({ slug, isDeleted: false })
+        .populate("leader", "_id username email")
+        .populate("members.userId", "_id username email");
+
+      if (!team) return res.status(404).json({ error: "Team not found" });
+
+      const isLeader = String(team.leaderId) === String(userId);
+      const isMember = team.members?.some(m => String(m.userId?._id || m.userId) === String(userId));
+      if (!isLeader && !isMember) return res.status(403).json({ error: "Forbidden" });
+
+      // Shape a light payload
+      const members = (team.members || []).map(m => ({
+        user: m.userId && typeof m.userId === 'object' ? {
+          _id: m.userId._id,
+          username: m.userId.username,
+          email: m.userId.email,
+        } : { _id: m.userId },
+        role: m.role,
+        status: m.status,
+        joinedAt: m.joinedAt,
+      }));
+
+      return res.json({
+        team: {
+          _id: team._id,
+          name: team.name,
+          slug: team.slug,
+          leader: team.leader ? { _id: team.leader._id, username: team.leader.username, email: team.leader.email } : undefined,
+          leaderId: team.leaderId,
+          members
+        }
+      });
+    } catch (err) {
+      console.error("members error:", err);
+      return res.status(500).json({ error: "Server error" });
     }
   };
   

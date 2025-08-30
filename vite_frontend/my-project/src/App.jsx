@@ -4,10 +4,23 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import SignupForm from './SignupForm'
 
-import { createBrowserRouter, RouterProvider} from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, useNavigate } from 'react-router-dom'
 import HomePage from './HomePage'
 import LoginPage from './LoginPage'
 import Dashboard from './Dashboard'
+import TeamDetail from './TeamDetail'
+
+function DashboardRoute() {
+  const navigate = useNavigate();
+  return (
+    <Dashboard
+      onOpenTeam={(team) => {
+        const slug = team?.slug || String(team?._id || '').trim();
+        if (slug) navigate(`/team/${slug}`);
+      }}
+    />
+  );
+}
 
 const router = createBrowserRouter([{
   path: '/',
@@ -23,7 +36,11 @@ const router = createBrowserRouter([{
 },
 {
   path: '/dashboard',
-  element: <Dashboard />
+  element: <DashboardRoute />
+},
+{
+  path: '/team/:slug',
+  element: <TeamDetail />
 }])
 export default function App() {
   return (

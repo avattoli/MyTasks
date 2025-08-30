@@ -60,7 +60,7 @@ export default function LoginPage() {
         return;
       }
 
-      navigate("/"); 
+      navigate("/dashboard");
     } catch (err) {
       setError(err.message || "Network error");
     } finally {
