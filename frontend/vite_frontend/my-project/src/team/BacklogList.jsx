@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../components/Modal";
+import { apiFetch } from "../api";
 
 export default function BacklogList({ team }) {
   const slug = team?.slug || team?.name;
@@ -16,15 +17,13 @@ export default function BacklogList({ team }) {
     setError("");
     try {
       // Load todo tasks
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks?status=todo`, {
-        credentials: 'include'
-      });
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks?status=todo`);
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || `Failed to load (${res.status})`);
       let arr = Array.isArray(body.tasks) ? body.tasks : [];
 
       // Load sprints and exclude tasks already assigned to any sprint
-      const sRes = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/sprints`, { credentials: 'include' });
+      const sRes = await apiFetch(`/teams/${encodeURIComponent(slug)}/sprints`);
       const sBody = await sRes.json().catch(() => ({}));
       const sprintTasks = new Set(
         Array.isArray(sBody?.sprints) ? sBody.sprints.flatMap(sp => (sp.taskIds || []).map(String)) : []
@@ -50,8 +49,8 @@ export default function BacklogList({ team }) {
     const t = title.trim();
     if (!t) return;
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: t, status: 'todo', priority, type })
       });
       const body = await res.json().catch(() => ({}));
@@ -75,8 +74,8 @@ export default function BacklogList({ team }) {
     try {
       const item = items.find(i => i._id === id);
       const labels = Array.isArray(item?.labels) ? Array.from(new Set([...item.labels, 'board'])) : ['board'];
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(id)}`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'todo', labels })
       });
       const body = await res.json().catch(() => ({}));
@@ -89,7 +88,7 @@ export default function BacklogList({ team }) {
 
   const loadSprints = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/sprints`, { credentials: 'include' });
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/sprints`);
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || `Failed to load sprints (${res.status})`);
       setSprints(Array.isArray(body.sprints) ? body.sprints : []);
@@ -99,8 +98,8 @@ export default function BacklogList({ team }) {
 
   const addToSprint = async (sprintId, taskId) => {
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(sprintId)}/tasks`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(sprintId)}/tasks`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ taskId })
       });
       const body = await res.json().catch(() => ({}));
@@ -116,8 +115,8 @@ export default function BacklogList({ team }) {
     const prev = items;
     setItems((p) => p.filter(i => i._id !== id));
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(id)}`, {
-        method: 'DELETE', credentials: 'include'
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
       });
       if (!res.ok && res.status !== 204) {
         const b = await res.json().catch(() => ({}));
@@ -138,11 +137,11 @@ export default function BacklogList({ team }) {
     setItems(next);
     try {
       await Promise.all([
-        fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(a._id)}`, {
-          method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ order: newOrderA })
+        apiFetch(`/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(a._id)}`, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: newOrderA })
         }),
-        fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(b._id)}`, {
-          method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ order: newOrderB })
+        apiFetch(`/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(b._id)}`, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: newOrderB })
         })
       ]);
     } catch (e) { console.error(e); load(); }

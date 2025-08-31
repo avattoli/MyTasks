@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Modal from "../components/Modal";
+import { apiFetch } from "../api";
 
 export default function KanbanBoard({ team }) {
   const slug = team?.slug || team?.name;
@@ -21,9 +22,7 @@ export default function KanbanBoard({ team }) {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks`, {
-          credentials: "include",
-        });
+        const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks`);
         const body = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(body?.error || `Failed to load tasks (${res.status})`);
         setCards(Array.isArray(body.tasks) ? body.tasks : []);
@@ -40,9 +39,7 @@ export default function KanbanBoard({ team }) {
     if (!slug) return;
     (async () => {
       try {
-        const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/board`, {
-          credentials: "include",
-        });
+        const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/board`);
         if (res.status === 404) { setBoard(null); return; }
         const body = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(body?.error || `Failed to load board (${res.status})`);
@@ -61,10 +58,9 @@ export default function KanbanBoard({ team }) {
     const t = title.trim();
     if (!t || !slug) return;
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks`, {
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ title: t, status: "todo", labels: ["board"] }),
       });
       const body = await res.json().catch(() => ({}));
@@ -79,10 +75,9 @@ export default function KanbanBoard({ team }) {
     if (!slug) return;
     setCards((prev) => prev.map((c) => (c._id === id ? { ...c, status } : c)));
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(id)}`, {
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(id)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ status }),
       });
       const body = await res.json().catch(() => ({}));
@@ -96,9 +91,8 @@ export default function KanbanBoard({ team }) {
     if (!slug) return;
     setCards((prev) => prev.filter((c) => c._id !== id));
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(id)}`, {
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(id)}`, {
         method: "DELETE",
-        credentials: "include",
       });
       if (!res.ok && res.status !== 204) {
         const body = await res.json().catch(() => ({}));
@@ -112,7 +106,7 @@ export default function KanbanBoard({ team }) {
   // Load backlog items not on board
   const openBacklogPicker = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks?status=todo`, { credentials: 'include' });
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks?status=todo`);
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || `Failed to load backlog (${res.status})`);
       const all = Array.isArray(body.tasks) ? body.tasks : [];
@@ -125,8 +119,8 @@ export default function KanbanBoard({ team }) {
   const addFromBacklog = async (task) => {
     try {
       const labels = Array.isArray(task.labels) ? Array.from(new Set([...task.labels, 'board'])) : ['board'];
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(task._id)}`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(task._id)}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ labels })
       });
       const body = await res.json().catch(() => ({}));
@@ -153,9 +147,7 @@ export default function KanbanBoard({ team }) {
           ) : (
             <button onClick={async () => {
               try {
-                const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/board`, {
-                  method: 'POST', credentials: 'include'
-                });
+                const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/board`, { method: 'POST' });
                 const body = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(body?.error || `Failed to create board (${res.status})`);
                 setBoard(body.board);
@@ -217,10 +209,9 @@ export default function KanbanBoard({ team }) {
                 maxTasks: Number(maxTasksInput),
                 columns: (board.columns || []).map(c => ({ key: c.key, wipLimit: colLimits[c.key] === '' ? null : Number(colLimits[c.key]) }))
               };
-              const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/board`, {
+              const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/board`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
                 body: JSON.stringify(payload)
               });
               const body = await res.json().catch(() => ({}));

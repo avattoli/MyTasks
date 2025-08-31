@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiFetch } from "./api";
 
 export default function SignupForm() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
@@ -14,7 +15,7 @@ export default function SignupForm() {
     e.preventDefault();
     setError("");
 
-    const res = await fetch("http://localhost:3000/users/signup", {
+    const res = await apiFetch("/users/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

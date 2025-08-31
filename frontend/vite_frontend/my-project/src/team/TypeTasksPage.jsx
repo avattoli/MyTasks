@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { apiFetch } from "../api";
 
 export default function TypeTasksPage({ team, type, title }) {
   const slug = team?.slug || team?.name;
@@ -15,7 +16,7 @@ export default function TypeTasksPage({ team, type, title }) {
       const q = new URLSearchParams();
       q.set("type", type);
       if (status) q.set("status", status);
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks?${q.toString()}` , { credentials: 'include' });
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks?${q.toString()}`);
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || `Failed to load (${res.status})`);
       const arr = Array.isArray(body.tasks) ? body.tasks : [];
@@ -75,4 +76,3 @@ export default function TypeTasksPage({ team, type, title }) {
     </div>
   );
 }
-

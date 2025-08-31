@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiFetch } from "./api";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
@@ -14,9 +15,7 @@ export default function LoginPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("http://localhost:3000/auth/me", {
-          credentials: "include",       
-        });
+        const res = await apiFetch("/auth/me");
         if (!res.ok) {
           setUser(null);
           return;
@@ -45,10 +44,9 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/users/login", {
+      const res = await apiFetch("/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // include if server sets a cookie on login
         body: JSON.stringify({ email: form.email, password: form.password }),
       });
 

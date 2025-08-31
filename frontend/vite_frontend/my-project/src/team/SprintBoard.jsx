@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Modal from "../components/Modal";
+import { apiFetch } from "../api";
 
 export default function SprintBoard({ team, sprint, onClose }) {
   const slug = team?.slug || team?.name;
@@ -14,7 +15,7 @@ export default function SprintBoard({ team, sprint, onClose }) {
     if (!slug || !sprintId) return;
     setLoading(true); setError("");
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(sprintId)}/tasks`, { credentials: 'include' });
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(sprintId)}/tasks`);
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || `Failed to load (${res.status})`);
       setTasks(Array.isArray(body.tasks) ? body.tasks : []);
@@ -30,8 +31,8 @@ export default function SprintBoard({ team, sprint, onClose }) {
     if (!slug) return;
     setTasks(prev => prev.map(t => t._id === id ? { ...t, status } : t));
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(id)}`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks/${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
       });
       const body = await res.json().catch(() => ({}));
@@ -44,7 +45,7 @@ export default function SprintBoard({ team, sprint, onClose }) {
     if (!slug || !sprintId) return;
     setTasks(prev => prev.filter(t => t._id !== id));
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(sprintId)}/tasks/${encodeURIComponent(id)}`, { method: 'DELETE', credentials: 'include' });
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(sprintId)}/tasks/${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (!res.ok && res.status !== 204) {
         const b = await res.json().catch(() => ({}));
         throw new Error(b?.error || `Failed to remove (${res.status})`);
@@ -54,7 +55,7 @@ export default function SprintBoard({ team, sprint, onClose }) {
 
   const openPicker = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/tasks?status=todo`, { credentials: 'include' });
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/tasks?status=todo`);
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || `Failed to load backlog (${res.status})`);
       const arr = Array.isArray(body.tasks) ? body.tasks : [];
@@ -66,8 +67,8 @@ export default function SprintBoard({ team, sprint, onClose }) {
 
   const addToSprint = async (task) => {
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(sprintId)}/tasks`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(sprintId)}/tasks`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ taskId: task._id })
       });
       const body = await res.json().catch(() => ({}));
@@ -155,4 +156,3 @@ function SprintCard({ task, onRemove }) {
     </div>
   );
 }
-

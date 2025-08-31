@@ -111,7 +111,7 @@ export default function HomePage() {
         {/* Footer */}
         <footer className="border-t border-zinc-800/80">
           <div className="flex w-full max-w-none items-center justify-between px-6 py-8 text-xs text-zinc-500 md:px-10">
-            <span>© {new Date().getFullYear()} CollabTasks</span>
+            <span>© {new Date().getFullYear()} CollabTasks </span>
             <div className="flex items-center gap-4">
               <a href="#" className="hover:text-zinc-300">Privacy</a>
               <a href="#" className="hover:text-zinc-300">Terms</a>

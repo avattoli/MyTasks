@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { apiFetch } from "../api";
 import Modal from "../components/Modal";
 import SprintBoard from "./SprintBoard";
 
@@ -15,7 +16,7 @@ export default function SprintsPage({ team }) {
     if (!slug) return;
     setLoading(true); setError("");
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/sprints`, { credentials: 'include' });
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/sprints`);
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || `Failed to load (${res.status})`);
       setSprints(Array.isArray(body.sprints) ? body.sprints : []);
@@ -28,8 +29,8 @@ export default function SprintsPage({ team }) {
   const createSprint = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/sprints`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/sprints`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, goal: form.goal, startDate: form.startDate || undefined, endDate: form.endDate || undefined })
       });
       const body = await res.json().catch(() => ({}));
@@ -41,8 +42,8 @@ export default function SprintsPage({ team }) {
 
   const update = async (id, patch) => {
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(id)}`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patch)
       });
       const body = await res.json().catch(() => ({}));
@@ -55,7 +56,7 @@ export default function SprintsPage({ team }) {
     const prev = sprints;
     setSprints((p) => p.filter(s => s._id !== id));
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(id)}`, { method: 'DELETE', credentials: 'include' });
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/sprints/${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (!res.ok && res.status !== 204) {
         const b = await res.json().catch(() => ({}));
         throw new Error(b?.error || `Failed to delete (${res.status})`);

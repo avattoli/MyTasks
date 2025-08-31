@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { apiFetch } from "../api";
 
 export default function MembersPage({ team }) {
   const slug = team?.slug || team?.name;
@@ -10,7 +11,7 @@ export default function MembersPage({ team }) {
     if (!slug) return;
     setLoading(true); setError("");
     try {
-      const res = await fetch(`http://localhost:3000/teams/${encodeURIComponent(slug)}/members`, { credentials: 'include' });
+      const res = await apiFetch(`/teams/${encodeURIComponent(slug)}/members`);
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || `Failed to load (${res.status})`);
       setData(body.team);
@@ -74,4 +75,3 @@ function MemberRow({ user, role, status, leader }) {
     </div>
   );
 }
-

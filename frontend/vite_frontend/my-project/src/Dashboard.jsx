@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { apiFetch } from "./api";
 
 /**
  * Teams Dashboard (Frontend-only, no fetch/logic)
@@ -28,10 +29,9 @@ export default function Dashboard({ user, onCreateTeam, onJoinTeam, onRefresh, o
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch("http://localhost:3000/teams/getTeams", {
-                  method: "GET", // should be GET if your route is read-only
+                const res = await apiFetch("/teams/getTeams", {
+                  method: "GET",
                   headers: { "Content-Type": "application/json" },
-                  credentials: "include" // if you’re using cookies for auth
                 });
         
                 if (!res.ok) {
@@ -57,11 +57,10 @@ export default function Dashboard({ user, onCreateTeam, onJoinTeam, onRefresh, o
         }
 
         try {
-            const res = await fetch("http://localhost:3000/teams/join", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include", // important if you’re using cookies for auth
-            body: JSON.stringify({joinCode: code })
+            const res = await apiFetch("/teams/join", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ joinCode: code })
             });
             
             if (!res.ok) {
@@ -90,11 +89,10 @@ export default function Dashboard({ user, onCreateTeam, onJoinTeam, onRefresh, o
         }
 
         try {
-            const res = await fetch("http://localhost:3000/teams/create", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include", // important if you’re using cookies for auth
-            body: JSON.stringify({ teamName })
+            const res = await apiFetch("/teams/create", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ teamName })
             });
         
             if (!res.ok) {
