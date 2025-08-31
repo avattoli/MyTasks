@@ -20,8 +20,10 @@ const allowedOrigins = rawOrigins
   .filter(Boolean);
 const allowAll = allowedOrigins.includes("*");
 
-app.use(cors());
-
+app.use(cors({
+  origin: "https://my-tasks-ashy.vercel.app",
+  credentials: true
+}));
 
 app.use(cookieParser());
 
