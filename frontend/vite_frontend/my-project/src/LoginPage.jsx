@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "./api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -134,7 +134,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-5 text-center text-sm text-zinc-400">
-          New here? <a href="/signup" className="text-emerald-400 hover:text-emerald-300">Create an account</a>
+          New here? <Link to="/signup" className="text-emerald-400 hover:text-emerald-300">Create an account</Link>
         </p>
       </div>
     </main>

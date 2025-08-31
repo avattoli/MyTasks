@@ -27,6 +27,7 @@ const kanbanBoardSchema = new Schema(
   { timestamps: true }
 );
 
-kanbanBoardSchema.index({ teamId: 1 }, { unique: true });
+// Note: `unique: true` on teamId already creates a unique index.
+// Avoid declaring the same index twice to prevent Mongoose warnings.
 
 module.exports = model("KanbanBoard", kanbanBoardSchema);

@@ -1,21 +1,23 @@
+import { Link } from "react-router-dom";
+
 export default function HomePage() {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         {/* Nav */}
         <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/70 backdrop-blur">
           <nav className="flex h-16 w-full max-w-none items-center justify-between px-6 md:px-10">
-            <a href="/" className="group inline-flex items-center gap-2">
+            <Link to="/" className="group inline-flex items-center gap-2">
               <div className="h-3 w-3 rounded-sm bg-emerald-500 transition-transform group-hover:scale-110" />
               <span className="text-sm font-medium tracking-wide text-zinc-300 group-hover:text-zinc-100">CollabTasks</span>
-            </a>
+            </Link>
             <div className="flex items-center gap-2">
-              <a href="/login" className="px-3 py-2 text-sm text-zinc-300 hover:text-zinc-100">Log in</a>
-              <a
-                href="/signup"
+              <Link to="/login" className="px-3 py-2 text-sm text-zinc-300 hover:text-zinc-100">Log in</Link>
+              <Link
+                to="/signup"
                 className="rounded-md bg-emerald-500 px-3 py-2 text-sm font-medium text-zinc-950 transition hover:bg-emerald-400"
               >
                 Sign up
-              </a>
+              </Link>
             </div>
           </nav>
         </header>
@@ -32,12 +34,12 @@ export default function HomePage() {
                 A modern project management tool. Create boards, assign tasks, and track your team’s progress all in one clean, minimal workspace.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <a
-                  href="/signup"
+                <Link
+                  to="/signup"
                   className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-zinc-950 transition hover:bg-emerald-400"
                 >
                   Get started
-                </a>
+                </Link>
                 <a
                   href="#features"
                   className="rounded-md border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-800"

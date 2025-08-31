@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { apiFetch } from "./api";
 
 export default function SignupForm() {
@@ -41,14 +42,14 @@ export default function SignupForm() {
               ✅ Thanks for signing up, {form.name}!
             </p>
 
-            <a href="/login">
+            <Link to="/login">
               <button
-                type="submit"
+                type="button"
                 className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-md font-medium transition"
               >
                 Sign in
               </button>
-            </a>
+            </Link>
 
           </>
 
