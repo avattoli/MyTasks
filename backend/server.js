@@ -37,6 +37,8 @@ const corsOptions = {
     .map(h => h.trim()),
 };
 app.use(cors(corsOptions));
+// Ensure preflight requests are handled for all routes
+app.options("*", cors(corsOptions));
 app.use(cookieParser());
 
 // mount routes
