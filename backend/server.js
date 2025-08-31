@@ -8,6 +8,8 @@ const teamRoutes = require("./routes/teams");
 const cookieParser = require("cookie-parser");
 
 const app = express();
+// Trust reverse proxies (needed for correct protocol and secure cookies on platforms like Render/Heroku)
+app.set("trust proxy", 1);
 app.use(express.json());
 
 // Configure CORS from environment for deployment flexibility

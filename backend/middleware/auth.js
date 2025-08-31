@@ -1,9 +1,10 @@
 
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const COOKIE_NAME = process.env.COOKIE_NAME || "refreshToken";
 
   exports.requireSession = (req, res, next) => {
-    const token = req.cookies.refreshToken; // or your cookie name
+    const token = req.cookies[COOKIE_NAME]; // cookie-based session token
     if (!token) return res.status(401).json({ error: "Not logged in" });
   
     try {

@@ -2,6 +2,22 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+const COOKIE_NAME = process.env.COOKIE_NAME || "refreshToken";
+function getCookieOptions() {
+  const rawSameSite = String(process.env.COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax")).toLowerCase();
+  const sameSite = ["lax", "strict", "none"].includes(rawSameSite) ? rawSameSite : "lax";
+  const forceSecure = String(process.env.COOKIE_SECURE || "").toLowerCase();
+  const secure = forceSecure === "true" || (forceSecure === "" && (sameSite === "none" || process.env.NODE_ENV === "production"));
+  const domain = process.env.COOKIE_DOMAIN;
+  return {
+    httpOnly: true,
+    sameSite,
+    secure,
+    ...(domain ? { domain } : {}),
+    maxAge: 24 * 60 * 60 * 1000
+  };
+}
+
 exports.signup = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
@@ -46,13 +62,7 @@ exports.login = async (req, res, next ) => {
     if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
     const token = signToken(user);
-    
-    res.cookie("refreshToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // allow http in dev
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
-    });
+    res.cookie(COOKIE_NAME, token, getCookieOptions());
     
     return res.status(200).json({
       message: "Logged in",
