@@ -20,27 +20,9 @@ const allowedOrigins = rawOrigins
   .filter(Boolean);
 const allowAll = allowedOrigins.includes("*");
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow non-browser clients (no origin) and configured origins
-    if (allowAll || !origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-  methods: (process.env.CORS_METHODS || "GET,POST,PUT,PATCH,DELETE,OPTIONS")
-    .split(",")
-    .map(m => m.trim()),
-  allowedHeaders: (process.env.CORS_HEADERS || "Content-Type,Authorization")
-    .split(",")
-    .map(h => h.trim()),
-};
-app.use(cors(corsOptions));
-// Ensure preflight requests are handled for all routes (Express 5 uses path-to-regexp v6; use (.*) instead of *)
-app.options("(.*)", cors(corsOptions));
-// Log CORS config at boot for visibility in hosting logs
-console.log("CORS allowAll:", allowAll, "allowedOrigins:", allowedOrigins);
+app.use(cors());
+
+
 app.use(cookieParser());
 
 // mount routes
