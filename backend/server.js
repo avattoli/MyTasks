@@ -37,8 +37,10 @@ const corsOptions = {
     .map(h => h.trim()),
 };
 app.use(cors(corsOptions));
-// Ensure preflight requests are handled for all routes
-app.options("*", cors(corsOptions));
+// Ensure preflight requests are handled for all routes (Express 5 uses path-to-regexp v6; use (.*) instead of *)
+app.options("(.*)", cors(corsOptions));
+// Log CORS config at boot for visibility in hosting logs
+console.log("CORS allowAll:", allowAll, "allowedOrigins:", allowedOrigins);
 app.use(cookieParser());
 
 // mount routes
