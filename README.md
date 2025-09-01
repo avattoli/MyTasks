@@ -16,3 +16,6 @@ MyTasks is a collaborative, full‑stack task management app designed to make sm
 
 ## Philosophy
 Keep collaboration simple. MyTasks focuses on the essentials—teams, tasks, boards, and sprints—so people can plan and execute without wrestling complex tooling.
+
+## Check it out here:
+https://my-tasks-ashy.vercel.app/
