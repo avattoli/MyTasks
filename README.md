@@ -1,52 +1,18 @@
 # MyTasks
 
-MyTasks is a full-stack task management application built with a Node.js/Express backend and a React frontend (powered by Vite). It supports team collaboration, user authentication, task boards and sprints.
+MyTasks is a collaborative, full‑stack task management app designed to make small‑team planning fast and intuitive. It blends a minimal, modern UI with practical features like Kanban boards, sprints, and lightweight team management so groups can organize work without overhead.
 
-## Features
-- User signup and login with JWT authentication
-- Team management: create teams, join teams, view members
-- Task management: create, list, update and delete tasks per team
-- Board and sprint management for organizing work
-- React frontend using Vite and Tailwind CSS
+## What It Does
+- Team spaces: Create a team, invite or join via a short code, and see members at a glance.
+- Tasks: Add, prioritize, and track tasks with simple statuses (to‑do, in‑progress, done).
+- Kanban board: Drag‑and‑drop columns with optional WIP limits to keep work focused.
+- Sprints: Group tasks into time‑boxed iterations and track progress.
+- Auth: Basic email/password login with cookie‑based sessions.
 
-## Prerequisites
-- [Node.js](https://nodejs.org/) and npm
-- A MongoDB instance
+## How It’s Built
+- Frontend: React (Vite) with a clean, dark UI designed for clarity and speed.
+- Backend: Node.js + Express with REST endpoints for users, teams, tasks, boards, and sprints.
+- Database: MongoDB with Mongoose models and indexes tuned for common queries.
 
-## Backend Setup
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Create a `.env` file in the project root with:
-   ```env
-   MONGODB_URI=<your mongodb uri>
-   PORT=3000
-   ```
-3. Start the API server:
-   ```bash
-   node server.js
-   ```
-
-## Frontend Setup
-1. Navigate to the frontend directory and install dependencies:
-   ```bash
-   cd vite_frontend/my-project
-   npm install
-   ```
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-The frontend will run on Vite's default port (usually `5173`) and interacts with the backend API running on port `3000`.
-
-## Testing
-Currently no automated tests are defined. You can still run the default npm test command:
-```bash
-npm test
-```
-which will report that no test script is configured.
-
-## License
-This project does not currently specify a license.
+## Philosophy
+Keep collaboration simple. MyTasks focuses on the essentials—teams, tasks, boards, and sprints—so people can plan and execute without wrestling complex tooling.

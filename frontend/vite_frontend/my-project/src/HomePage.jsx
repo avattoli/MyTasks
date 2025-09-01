@@ -8,7 +8,7 @@ export default function HomePage() {
           <nav className="flex h-16 w-full max-w-none items-center justify-between px-6 md:px-10">
             <Link to="/" className="group inline-flex items-center gap-2">
               <div className="h-3 w-3 rounded-sm bg-emerald-500 transition-transform group-hover:scale-110" />
-              <span className="text-sm font-medium tracking-wide text-zinc-300 group-hover:text-zinc-100">CollabTasks</span>
+              <span className="text-sm font-medium tracking-wide text-zinc-300 group-hover:text-zinc-100">MyTasks</span>
             </Link>
             <div className="flex items-center gap-2">
               <Link to="/login" className="px-3 py-2 text-sm text-zinc-300 hover:text-zinc-100">Log in</Link>
@@ -113,7 +113,7 @@ export default function HomePage() {
         {/* Footer */}
         <footer className="border-t border-zinc-800/80">
           <div className="flex w-full max-w-none items-center justify-between px-6 py-8 text-xs text-zinc-500 md:px-10">
-            <span>© {new Date().getFullYear()} CollabTasks </span>
+            <span>© {new Date().getFullYear()} MyTasks </span>
             <div className="flex items-center gap-4">
               <a href="#" className="hover:text-zinc-300">Privacy</a>
               <a href="#" className="hover:text-zinc-300">Terms</a>
